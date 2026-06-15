@@ -126,8 +126,9 @@ GROQ_API_KEY = "your_groq_api_key_here"
 
 ---
 
-## 📄 License
+## 👩‍💻 Author
 
-MIT License — free to use, modify, and distribute.
+**Lahari Gadamsetty**
 
-
+* GitHub: https://github.com/laharisetty29
+* LinkedIn: https://www.linkedin.com/in/laharigadamsetty

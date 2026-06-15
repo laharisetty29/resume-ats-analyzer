@@ -1,8 +1,21 @@
 import re
 import json
 import os
-from groq import Groq
+import time
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Load secret from Streamlit Cloud or local .env
+# ─────────────────────────────────────────────────────────────────────────────
+try:
+    import streamlit as st
+    if "GROQ_API_KEY" in st.secrets:
+        os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
+except Exception:
+    pass  # Running locally — will read from .env instead
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PROMPT TEMPLATE
+# ─────────────────────────────────────────────────────────────────────────────
 PROMPT_TEMPLATE = """
 You are an expert ATS (Applicant Tracking System) and career coach AI.
 Carefully analyze the resume against the job description provided.
@@ -37,6 +50,9 @@ JOB DESCRIPTION:
 """
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# HELPER — Strip markdown fences
+# ─────────────────────────────────────────────────────────────────────────────
 def _clean_json(raw: str) -> str:
     raw = raw.strip()
     raw = re.sub(r"^```(?:json)?\s*\n?", "", raw, flags=re.IGNORECASE)
@@ -48,13 +64,20 @@ def _clean_json(raw: str) -> str:
     return raw.strip()
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# HELPER — Parse and validate JSON result
+# ─────────────────────────────────────────────────────────────────────────────
 def _parse_result(raw_text: str) -> dict:
     clean = _clean_json(raw_text)
+
     try:
         result = json.loads(clean)
     except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON from AI.\n\nError: {e}\n\nRaw:\n{raw_text[:600]}")
+        raise ValueError(
+            f"AI returned invalid JSON.\n\nError: {e}\n\nRaw output:\n{raw_text[:600]}"
+        )
 
+    # Fill missing keys with safe defaults
     defaults = {
         "ats_score":              0,
         "keyword_match_score":    0,
@@ -77,6 +100,7 @@ def _parse_result(raw_text: str) -> dict:
         if key not in result:
             result[key] = default
 
+    # Clamp scores 0–100
     for score_key in ["ats_score", "keyword_match_score", "format_score", "experience_match_score"]:
         try:
             result[score_key] = max(0, min(100, int(result[score_key])))
@@ -86,62 +110,123 @@ def _parse_result(raw_text: str) -> dict:
     return result
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# MAIN FUNCTION — called from app.py
+# ─────────────────────────────────────────────────────────────────────────────
 def analyze_resume(resume_text: str, jd_text: str) -> dict:
     """
-    Analyze resume using Groq API (free, fast, no rate limits).
-    Get free key at: console.groq.com
-    Add to .env:  GROQ_API_KEY=your_key_here
+    Analyze resume vs job description using Groq API (free, fast).
+    Get your free key at: console.groq.com
+    Local:  add GROQ_API_KEY=your_key to .env
+    Cloud:  add GROQ_API_KEY in Streamlit secrets dashboard
     """
 
+    # ── Input validation ──────────────────────────────────────────────────────
     if not resume_text or not resume_text.strip():
-        raise ValueError("Resume text is empty. Make sure your PDF is not a scanned image.")
+        raise ValueError(
+            "Resume text is empty. "
+            "Could not extract text from the uploaded file. "
+            "Make sure your PDF is not a scanned image."
+        )
     if not jd_text or not jd_text.strip():
-        raise ValueError("Job description is empty.")
+        raise ValueError(
+            "Job description is empty. Please paste the full job description."
+        )
 
+    # ── Check package ─────────────────────────────────────────────────────────
+    try:
+        from groq import Groq
+    except ImportError:
+        raise ImportError(
+            "groq package is not installed.\n"
+            "Run:  pip install groq"
+        )
+
+    # ── Check API key ─────────────────────────────────────────────────────────
     api_key = os.getenv("GROQ_API_KEY", "").strip()
     if not api_key:
         raise ValueError(
-            "GROQ_API_KEY not found in .env file.\n"
-            "1. Go to console.groq.com\n"
-            "2. Sign up free (no card needed)\n"
-            "3. Click 'API Keys' → 'Create API Key'\n"
-            "4. Add to .env:  GROQ_API_KEY=your_key_here\n"
-            "5. Restart the app"
+            "GROQ_API_KEY not found.\n\n"
+            "Local setup:\n"
+            "  1. Go to console.groq.com\n"
+            "  2. Sign up free (no card needed)\n"
+            "  3. Click 'API Keys' → 'Create API Key'\n"
+            "  4. Add to .env:  GROQ_API_KEY=your_key_here\n"
+            "  5. Restart the app\n\n"
+            "Streamlit Cloud:\n"
+            "  Add GROQ_API_KEY in App Settings → Secrets"
         )
 
-    client = Groq(api_key=api_key)
-
+    # ── Build prompt ──────────────────────────────────────────────────────────
     prompt = PROMPT_TEMPLATE.format(
         resume_text=resume_text[:4000],
         jd_text=jd_text[:2000],
     )
 
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",   # Free, powerful model on Groq
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are an expert ATS analyzer. Always respond with valid JSON only. No markdown, no explanation."
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            temperature=0.2,
-            max_tokens=2048,
-            response_format={"type": "json_object"},  # Forces pure JSON output
-        )
+    # ── Call Groq API with retry ──────────────────────────────────────────────
+    client = Groq(api_key=api_key)
+    raw_text    = None
+    max_retries = 3
 
-        raw_text = response.choices[0].message.content
-        return _parse_result(raw_text)
+    for attempt in range(max_retries):
+        try:
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are an expert ATS analyzer. "
+                            "Always respond with valid JSON only. "
+                            "No markdown, no explanation, no code fences."
+                        ),
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    },
+                ],
+                temperature=0.2,
+                max_tokens=2048,
+                response_format={"type": "json_object"},
+            )
 
-    except Exception as e:
-        error_msg = str(e).lower()
-        if "api_key" in error_msg or "invalid" in error_msg or "401" in error_msg:
-            raise ValueError("Invalid Groq API key. Check GROQ_API_KEY in your .env file.")
-        elif "quota" in error_msg or "rate" in error_msg or "429" in error_msg:
-            raise ValueError("Groq rate limit hit. Wait 30 seconds and try again.")
-        else:
-            raise ValueError(f"Groq API error: {e}")
+            raw_text = response.choices[0].message.content
+            break  # success — exit retry loop
+
+        except Exception as e:
+            error_msg = str(e).lower()
+
+            if "api_key" in error_msg or "invalid" in error_msg or "401" in error_msg:
+                raise ValueError(
+                    "Invalid Groq API key. "
+                    "Check your GROQ_API_KEY in .env or Streamlit secrets."
+                )
+
+            elif "quota" in error_msg or "rate" in error_msg or "429" in error_msg:
+                if attempt < max_retries - 1:
+                    wait = 30 * (attempt + 1)   # 30s first, 60s second
+                    try:
+                        import streamlit as st
+                        st.warning(
+                            f"⏳ Rate limit hit — retrying in {wait}s "
+                            f"(attempt {attempt + 1}/{max_retries})..."
+                        )
+                    except Exception:
+                        pass
+                    time.sleep(wait)
+                    continue
+                else:
+                    raise ValueError(
+                        "Groq API rate limit exceeded after 3 attempts. "
+                        "Please wait 1 minute and try again."
+                    )
+
+            else:
+                raise ValueError(f"Groq API error: {e}")
+
+    if raw_text is None:
+        raise ValueError("No response received from Groq after retries.")
+
+    # ── Parse and return ──────────────────────────────────────────────────────
+    return _parse_result(raw_text)

@@ -52,12 +52,12 @@ pip install -r requirements.txt
 
 ## Add API Key
 
-# Create a .env file:
+## Create a .env file:
 ```bash
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
-# Run Locally
+## Run Locally
 ```bash
 streamlit run app.py
 ```

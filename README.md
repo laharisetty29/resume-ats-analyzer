@@ -1,4 +1,4 @@
-# 📄 Resume ATS Analyzer
+<img width="1366" height="613" alt="ats-checker" src="https://github.com/user-attachments/assets/fe530297-1e09-4d38-80a2-025d320c7c84" /># 📄 Resume ATS Analyzer
 
 An AI-powered web app that analyzes your resume against a job description and gives you an ATS compatibility score, missing skills, and tailored improvement tips — instantly.
 
@@ -6,7 +6,7 @@ An AI-powered web app that analyzes your resume against a job description and gi
 
 ## 🚀 Live Demo
 
-👉 [Try it here](https://your-app-url.streamlit.app)
+👉 [Try it here](https://resume-ats-analyzer-vclgbvwcvmpwfqugnxmzju.streamlit.app/)
 
 ---
 
@@ -126,15 +126,8 @@ GROQ_API_KEY = "your_groq_api_key_here"
 
 ---
 
-## 📸 Screenshots
-
-> Add screenshots of your app here after deployment
-
----
-
 ## 📄 License
 
 MIT License — free to use, modify, and distribute.
 
----
 

@@ -72,11 +72,7 @@ streamlit run app.py
 
 ## Author
 
-** Lahari Gadamsetty **
-
-GitHub: https://github.com/laharisetty29
-LinkedIn: https://www.linkedin.com/in/laharigadamsetty
-
+**Lahari Gadamsetty**
 
 ## License
 

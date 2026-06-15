@@ -1,4 +1,4 @@
-<img width="1366" height="613" alt="ats-checker" src="https://github.com/user-attachments/assets/fe530297-1e09-4d38-80a2-025d320c7c84" /># 📄 Resume ATS Analyzer
+# 📄 Resume ATS Analyzer
 
 An AI-powered web app that analyzes your resume against a job description and gives you an ATS compatibility score, missing skills, and tailored improvement tips — instantly.
 

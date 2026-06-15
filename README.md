@@ -1,134 +1,83 @@
-# 📄 Resume ATS Analyzer
+# Resume ATS Analyzer
 
-An AI-powered web app that analyzes your resume against a job description and gives you an ATS compatibility score, missing skills, and tailored improvement tips — instantly.
+AI-powered Resume ATS Analyzer built with Streamlit. This app analyzes a resume against a job description and gives an ATS score, missing skills, matched skills, and improvement suggestions.
 
----
+## Live Demo
 
-## 🚀 Live Demo
+🔗 Streamlit App: https://resume-ats-analyzer-vclgbvwcvmpwfqugnxmzju.streamlit.app/
 
-👉 [Try it here](https://resume-ats-analyzer-vclgbvwcvmpwfqugnxmzju.streamlit.app/)
+## Features
 
----
+- Upload resume in PDF, DOCX, or TXT format
+- Paste job description
+- Generate ATS compatibility score
+- Identify matched and missing skills
+- Get resume improvement suggestions
+- Simple Streamlit web interface
+- AI-powered analysis using Groq LLaMA model
 
-## ✨ Features
+## Tech Stack
 
-- ✅ ATS Score (0–100) with grade badge
-- 🔑 Keyword match, format, and experience sub-scores
-- 💚 Skills found vs ❌ missing — color-coded tags
-- 📊 Visual score breakdown with progress bars
-- 💡 Strengths and ⚠️ weaknesses analysis
-- 🛠️ 5–7 specific, actionable improvement suggestions
-- 🎯 Job title match, experience gap, and education fit insights
-- 📌 Recommended resume sections to add or improve
-- 📄 Supports PDF, DOCX, and TXT resume uploads
+- Python
+- Streamlit
+- Groq API
+- LLaMA 3.3 70B
+- PyPDF2
+- python-docx
+- dotenv
 
----
+## Project Structure
 
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| UI | Streamlit |
-| AI Model | LLaMA 3.3 70B via Groq API |
-| Resume Parsing | PyPDF2, python-docx |
-| Styling | Custom CSS (dark theme) |
-| Deployment | Streamlit Cloud |
-
----
-
-## 📁 Project Structure
-
-```bash
-resume_ats_analyzer/
-
-├── app.py            # Main entry point
-
-├── analyzer.py       # Groq AI analysis logic
-
-├── extractor.py      # PDF / DOCX / TXT text extraction
-
-├── layout.py         # Streamlit result rendering
-
-├── components.py     # Reusable HTML components
-
-├── styles.py         # All CSS styles
-
-├── helpers.py        # Score colors, grades, progress bars
-
-├── requirements.txt  # Dependencies
-
-└── .env              # API key (local only, not in GitHub)
-
+```text
+resume-ats-analyzer/
+│
+├── app.py
+├── analyzer.py
+├── extractor.py
+├── layout.py
+├── components.py
+├── helpers.py
+├── styles.py
+├── requirements.txt
+├── .gitignore
+└── README.md
 ```
 
----
-
-## ⚙️ Run Locally
-
-### 1. Clone the repo
+## Installation
 ```bash
-git clone https://github.com/YOUR_USERNAME/resume-ats-analyzer.git
+git clone https://github.com/laharisetty29/resume-ats-analyzer.git
 cd resume-ats-analyzer
-```
-
-### 2. Create virtual environment
-```bash
-python -m venv venv
-
-# Windows
-venv\Scripts\activate
-
-# Mac/Linux
-source venv/bin/activate
-```
-
-### 3. Install dependencies
-```bash
 pip install -r requirements.txt
 ```
 
-### 4. Add your Groq API key
-Create a `.env` file in the project root:
+## Add API Key
+
+# Create a .env file:
 ```bash
 GROQ_API_KEY=your_groq_api_key_here
 ```
-> 🔑 Get your **free** Groq API key at [console.groq.com](https://console.groq.com) — no credit card needed.
 
-### 5. Run the app
+# Run Locally
 ```bash
 streamlit run app.py
 ```
 
-Opens at `http://localhost:8501`
+## How It Works
+- User uploads a resume
+- User pastes the job description
+- The app extracts resume text
+- AI compares resume with job requirements
+- App displays ATS score, matched skills, missing skills, and suggestions
 
----
 
-## ☁️ Deploy on Streamlit Cloud
+## Author
 
-1. Push this repo to GitHub
-2. Go to [share.streamlit.io](https://share.streamlit.io)
-3. Connect your GitHub repo
-4. Set main file as `app.py`
-5. Go to **Advanced Settings → Secrets** and add:
-```toml
-GROQ_API_KEY = "your_groq_api_key_here"
-```
-6. Click **Deploy** ✅
+** Lahari Gadamsetty **
 
----
+GitHub: https://github.com/laharisetty29
+LinkedIn: https://www.linkedin.com/in/laharigadamsetty
 
-## 🔑 Get Free Groq API Key
 
-1. Go to [console.groq.com](https://console.groq.com)
-2. Sign up with Google or email (no card needed)
-3. Click **API Keys** → **Create API Key**
-4. Copy and paste into your `.env` file or Streamlit secrets
+## License
 
----
-
-## 👩‍💻 Author
-
-**Lahari Gadamsetty**
-
-* GitHub: https://github.com/laharisetty29
-* LinkedIn: https://www.linkedin.com/in/laharigadamsetty
+This project is for learning and portfolio purposes.

@@ -6,6 +6,10 @@ AI-powered Resume ATS Analyzer built with Streamlit. This app analyzes a resume 
 
 🔗 Streamlit App: https://resume-ats-analyzer-vclgbvwcvmpwfqugnxmzju.streamlit.app/
 
+### 🔗 GitHub Repository
+
+https://github.com/laharisetty29/Financial-Fraud-Detection
+
 ## Features
 
 - Upload resume in PDF, DOCX, or TXT format

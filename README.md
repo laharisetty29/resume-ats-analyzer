@@ -2,9 +2,11 @@
 
 AI-powered Resume ATS Analyzer built with Streamlit. This app analyzes a resume against a job description and gives an ATS score, missing skills, matched skills, and improvement suggestions.
 
-## Live Demo
+## Live Demo 
 
-🔗 Streamlit App: https://resume-ats-analyzer-vclgbvwcvmpwfqugnxmzju.streamlit.app/
+### 🔗 Streamlit App
+
+https://resume-ats-analyzer-vclgbvwcvmpwfqugnxmzju.streamlit.app/
 
 ### 🔗 GitHub Repository
 
